@@ -4,7 +4,7 @@ import firebase from 'firebase/compat';
 
 import UserContext from '../contexts/user';
 import IPageProps from '../interfaces/page';
-import { SignInWithSocialMedia as SocialMediaPopup } from '../modules/auth';
+import { Authenticate, SignInWithSocialMedia as SocialMediaPopup } from '../modules/auth';
 import logging from '../config/logging';
 import CenterPiece from '../components/CenterPiece';
 import { Button, Card, CardBody, CardHeader } from 'reactstrap';
@@ -39,7 +39,15 @@ const LoginPage: React.FunctionComponent<IPageProps> = (props) => {
             try {
               let fire_token = await user.getIdToken();
 
-              /* If we get a token, auth with the backend */
+              Authenticate(uid, name, fire_token, (error, _user) => {
+                if (error) {
+                  setError(error);
+                  setAuthenticating(false);
+                } else if (_user) {
+                  userContext.userDispatch({ type: 'login', payload: { user: _user, fire_token } });
+                  history.push('/');
+                }
+              });
             } catch (error) {
               setError('Invalid token.');
               logging.error(error);

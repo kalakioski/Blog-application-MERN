@@ -1,9 +1,11 @@
 import React, { useEffect, useReducer, useState } from 'react';
-import { Route, Switch, RouteChildrenProps } from 'react-router-dom';
+import { Route, Switch, RouteComponentProps } from 'react-router-dom';
 import AuthRoute from './components/AuthRoute';
 import LoadingComponent from './components/LoadingComponent';
+import logging from './config/logging';
 import routes from './config/routes';
 import { initialUserState, UserContextProvider, userReducer } from './contexts/user';
+import { Validate } from './modules/auth';
 
 export interface IApplicationProps {}
 
@@ -38,11 +40,22 @@ const Application: React.FunctionComponent<IApplicationProps> = (props) => {
         setLoading(false);
       }, 1000);
     } else {
-      /* Validate with the backend */
-      setAuthStage('Credentials found, validating...');
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
+      return Validate(fire_token, (error, user) => {
+        if (error) {
+          logging.error(error);
+          setAuthStage('User not valid, logging out ...');
+          userDispatch({ type: 'logout', payload: initialUserState });
+          setTimeout(() => {
+            setLoading(false);
+          }, 1000);
+        } else if (user) {
+          setAuthStage('User authenticated.');
+          userDispatch({ type: 'login', payload: { user, fire_token } });
+          setTimeout(() => {
+            setLoading(false);
+          }, 1000);
+        }
+      });
     }
   };
 
@@ -60,30 +73,21 @@ const Application: React.FunctionComponent<IApplicationProps> = (props) => {
       <Switch>
         {routes.map((route, index) => {
           if (route.auth) {
-            <Route
-              key={index}
-              exact={route.exact}
-              path={route.path}
-              render={(routeProps: RouteChildrenProps<any>) => (
-                <AuthRoute>
-                  <route.component {...routeProps} />
-                </AuthRoute>
-              )}
-            />;
+            return (
+              <Route
+                key={index}
+                exact={route.exact}
+                path={route.path}
+                render={(routeProps: RouteComponentProps<any>) => (
+                  <AuthRoute>
+                    <route.component {...routeProps} />
+                  </AuthRoute>
+                )}
+              />
+            );
           }
 
-          return (
-            <Route
-              key={index}
-              exact={route.exact}
-              path={route.path}
-              render={(routeProps: RouteChildrenProps<any>) => (
-                <>
-                  <route.component {...routeProps} />
-                </>
-              )}
-            />
-          );
+          return <Route path={route.path} exact={route.exact} key={index} render={(routeProps: RouteComponentProps) => <route.component {...routeProps} />} />;
         })}
       </Switch>
     </UserContextProvider>

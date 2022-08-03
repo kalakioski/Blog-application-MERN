@@ -6,52 +6,52 @@ import BlogPage from '../pages/blog';
 
 const authRoutes: IRoute[] = [
   {
-    path: `/login`,
+    name: 'Login',
+    path: '/login',
     exact: true,
-    auth: false,
     component: LoginPage,
-    name: 'Login'
+    auth: false
   },
   {
-    path: `/register`,
+    name: 'Sign Up',
+    path: '/register',
     exact: true,
-    auth: false,
     component: LoginPage,
-    name: 'Register'
+    auth: false
   }
 ];
 
 const blogRoutes: IRoute[] = [
   {
-    path: `/edit`,
+    name: 'Create',
+    path: '/edit',
     exact: true,
-    auth: true,
     component: EditPage,
-    name: 'Edit'
+    auth: true
   },
   {
-    path: `/edit/:blogID`,
+    name: 'Edit',
+    path: '/edit/:blogID',
     exact: true,
-    auth: true,
     component: EditPage,
-    name: 'Edit'
+    auth: true
   },
   {
-    path: `/edit/:blogID`,
+    name: 'Blog',
+    path: '/blogs/:blogID',
     exact: true,
-    auth: false,
     component: BlogPage,
-    name: 'Blog'
+    auth: false
   }
 ];
 
 const mainRoutes: IRoute[] = [
   {
-    path: `/`,
+    name: 'Home',
+    path: '/',
     exact: true,
-    auth: true,
     component: HomePage,
-    name: 'Home'
+    auth: false
   }
 ];
 
